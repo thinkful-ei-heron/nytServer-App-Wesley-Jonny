@@ -5,50 +5,30 @@ const app = express();
 app.use(morgan('common'));
 const playStore = require('./playstore.js');
 
-app.get('/apps',(req,res) => {
+app.get('/apps', (req, res) => {
+  let apps = playStore;
+  const {sort, genres} = req.query;
 
-  let results = playStore;
-  let { genre, sort} = req.query;
-  // If genre or sort is provided
-
-  if (genre){
-    genre.toLowerCase();
-  }
-
-  if(sort){
-    sort = sort.toLowerCase();
-    sort = sort.charAt(0).toUpperCase() + sort.slice(1);
-    if(sort === 'Rating'){
-      results.sort((a,b)=>{
-        return a[sort] < b[sort] ? 1 : -1;
-      });
+  if (sort) {
+    if ((!['app', 'rating'].includes(sort.toLowerCase()))) {
+      return res.status(400).send('Please provide a valid Sort');
     }
-    if (sort === 'App'){
-      results.sort((a,b)=>{
-        return a[sort].toUpperCase() > b[sort].toUpperCase() ? 1 : -1;
-      });
+    apps.sort((a, b) => {
+      let word = sort.toLowerCase().substring(0,1).toUpperCase()+sort.toLowerCase().substring(1);
+      return a[word] > b[word] ? 1 : a[word] < b[word] ? -1 : 0;
+    });
+    if(sort.toLowerCase().includes('rating')){
+      apps.reverse();
     }
   }
-  // if (sort){
-  //   results.sort((a,b)=>{
-  //     return a[sort] > b[sort] ? 1 : a[sort] < b[sort] ? -1 : 0;
-  //   });
-  // }
-
-  // validate the input
-
-  // logic of sorting
-
-  
-  //   .filter(book =>
-  //     book
-  //       .title
-  //       .toLowerCase()
-  //       .includes(search.toLowerCase()));
-
-  return res.json(results);
+  if (genres) {
+    if (['action', 'puzzle', 'strategy', 'casual', 'arcade', 'card'].includes(genres.toLowerCase())) {
+      apps = apps.filter(app => app.Genres.toLowerCase().includes(genres.toLowerCase()));
+    } else {
+      return res.status(400).send('Please provide a valid Genre');
+    }
+  }
+  res.json(apps);
 });
 
-app.listen(8000, () =>{
-  console.log('Server started on PORT 8000');
-});
+module.exports = app;
