@@ -1,4 +1,4 @@
-const divide = require('../index');
+const {divide} = require('../index');
 const expect = require('chai').expect;
 
 describe('This is a description of my test.', () => {
