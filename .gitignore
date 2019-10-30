@@ -1,2 +1,4 @@
 node_modules
 express-testing/node_modules
+.DS_Store
+playstore/node_modules
